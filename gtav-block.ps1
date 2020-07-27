@@ -1,23 +1,48 @@
-﻿# port 6672 inbound/outbound
+﻿#Requires -RunAsAdministrator
 $ruleName = "GTAV Block"
 
-Write-Host "1 - Enable Firewall rules"
-Write-Host "2 - Disable Firewall rules"
-Write-Host "3 - View Firewall rules status"
-$selection = Read-Host "Select option"
-
-try {
-    if ($selection -eq 1) {
-        netsh advfirewall firewall set rule name="GTAV Block" new enable=yes
-    } elseif ($selection -eq 2) {
-        netsh advfirewall firewall set rule name="GTAV Block" new enable=no
-    } elseif ($selection -eq 3) {
-        netsh advfirewall firewall show rule name="GTAV Block"
-    } else {
-        Write-Host "Invalid option!"
-    }
-} catch {
-    Write-Error "Error!"
+function Get-CmdInput
+{
+    Write-Host "0 - Quit"
+    Write-Host "1 - Enable Firewall rules"
+    Write-Host "2 - Disable Firewall rules"
+    Write-Host "3 - View Firewall rules status"
+    return Read-Host "Select option"
 }
 
-Read-Host "Press enter to quit"
+
+# port 6672 inbound/outbound
+function Toggle-Firewall
+{
+    param ([switch]$on)
+    
+    try {
+        $enable = "no"
+        if ($on) { $enable = "yes" }
+
+        netsh advfirewall firewall set rule name="GTAV Block" new enable=$enable
+    } catch {
+        Write-Error "Error!"
+    }
+}
+
+
+function Run-MainMethod
+{
+    $selection = -1
+    while ($selection -ne 0) {
+        $selection = Get-CmdInput
+
+        if ($selection -eq 1) {
+            Toggle-Firewall -on
+        } elseif ($selection -eq 2) {
+            Toggle-Firewall
+        } elseif ($selection -eq 3) {
+            netsh advfirewall firewall show rule name="GTAV Block"
+        } else {
+            Write-Host "Invalid option!"
+        }
+    }
+}
+
+Run-GtavBlock
